@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AU Admin Portal</title>
+<link rel="stylesheet" href="style.css">
+<style>
+    body { font-family: Arial, sans-serif; background:#f4f4f4; margin:0; }
+    .container { max-width: 400px; margin: 50px auto; padding: 20px; background:#fff; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
+    input { width: 100%; padding:10px; margin:5px 0 15px; border-radius:5px; border:1px solid #ccc; }
+    button { padding:10px; width:100%; border:none; border-radius:5px; background:#003366; color:#fff; cursor:pointer; }
+    button:hover { background:#0055a5; }
+    h2 { text-align:center; color:#003366; }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Admin Login</h2>
+    <input type="text" id="adminUser" placeholder="Username" required>
+    <input type="password" id="adminPass" placeholder="Password" required>
+    <button onclick="adminLogin()">Login</button>
+    <p id="loginMsg" style="color:red; text-align:center; margin-top:10px;"></p>
+</div>
+
+<script>
+// Example admin credentials (could later be stored securely in backend)
+const admins = [
+    { username: "admin", password: "admin123" },
+    { username: "supervisor", password: "au2026" }
+];
+
+function adminLogin(){
+    const user = document.getElementById('adminUser').value.trim();
+    const pass = document.getElementById('adminPass').value.trim();
+    const msg = document.getElementById('loginMsg');
+
+    const valid = admins.find(a => a.username === user && a.password === pass);
+
+    if(valid){
+        localStorage.setItem('adminLoggedIn', 'true');
+        location.href = 'adminPanel.html'; // Redirect to admin dashboard
+    } else {
+        msg.textContent = "Invalid username or password!";
+    }
+}
+</script>
+</body>
+</html>

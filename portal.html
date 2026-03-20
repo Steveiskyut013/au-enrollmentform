@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AU Student Portal</title>
+<style>
+/* -------- GLOBAL -------- */
+* { box-sizing: border-box; margin: 0; padding: 0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+body { background:#f4f6f9; display:flex; min-height:100vh; }
+
+/* -------- SIDEBAR -------- */
+.sidebar { width:250px; background:#003366; color:white; flex-shrink:0; display:flex; flex-direction:column; }
+.sidebar h2 { text-align:center; padding:20px 10px; font-size:1.4rem; }
+.sidebar nav a { display:block; padding:15px 20px; color:white; text-decoration:none; transition:0.2s; }
+.sidebar nav a:hover, .sidebar nav a.active { background:#0055aa; }
+
+/* -------- HEADER -------- */
+.header { background:#0055aa; padding:15px 20px; color:white; display:flex; justify-content:space-between; align-items:center; }
+.header h3 { font-size:1.2rem; }
+.header button { padding:8px 12px; border:none; border-radius:6px; background:#003366; color:white; cursor:pointer; transition:0.2s; }
+.header button:hover { background:#001f44; }
+
+/* -------- MAIN CONTENT -------- */
+.main { flex:1; padding:20px; overflow-y:auto; }
+.card { background:white; padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); margin-bottom:20px; }
+.card h4 { margin-bottom:12px; color:#003366; }
+.card p { margin-bottom:6px; }
+.card img { border-radius:8px; margin-top:10px; }
+
+/* -------- TABLE -------- */
+table { width:100%; border-collapse:collapse; margin-top:10px; }
+table, th, td { border:1px solid #ccc; }
+th, td { padding:8px; text-align:left; }
+
+/* -------- LOGIN CONTAINER -------- */
+#loginContainer { margin:auto; max-width:400px; background:white; padding:30px; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.1); }
+#loginContainer input, #loginContainer button { width:100%; padding:10px; margin:10px 0; border-radius:8px; border:1px solid #ccc; font-size:1rem; }
+#loginContainer button { background:#003366; color:white; border:none; cursor:pointer; }
+#loginContainer button:hover { background:#0055aa; }
+
+/* -------- RESPONSIVE -------- */
+@media(max-width:768px){
+  .sidebar { position:absolute; left:-250px; top:0; height:100%; z-index:10; transition:0.3s; }
+  .sidebar.show { left:0; }
+  .main { padding:15px; }
+  .header button.toggle { display:inline-block; }
+}
+.toggle { display:none; }
+
+/* -------- PRINT STYLES -------- */
+@media print {
+  body * { visibility: hidden; }
+  #printable, #printable * { visibility: visible; }
+  #printable { position: absolute; top:0; left:0; width:100%; }
+}
+
+/* -------- OFFICIAL AU FORM STYLES -------- */
+#printable { padding:20px; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+#printable h2 { text-align:center; color:#003366; margin-bottom:10px; }
+#printable h4 { margin-bottom:5px; }
+#printable table { border:1px solid #003366; width:100%; }
+#printable th, #printable td { border:1px solid #003366; padding:8px; text-align:left; }
+#printable .id-card { border:1px solid #003366; padding:10px; width:300px; text-align:center; margin-bottom:15px; }
+#printable .id-back { border:1px solid #003366; padding:10px; width:300px; text-align:center; margin-bottom:15px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginContainer">
+  <h3>Student Login</h3>
+  <input type="text" id="studentID" placeholder="Enter AU ID">
+  <button onclick="loginStudent()">Login</button>
+</div>
+
+<!-- PORTAL -->
+<div class="sidebar" id="sidebar" style="display:none;">
+  <h2>AU Portal</h2>
+  <nav>
+    <a href="#" class="active" onclick="showSection('info')">Profile</a>
+    <a href="#" onclick="showSection('academic')">Academic Info</a>
+    <a href="#" onclick="showSection('id')">Student ID</a>
+  </nav>
+</div>
+
+<div class="main" id="mainContent" style="display:none;">
+  <div class="header">
+    <h3>Welcome, <span id="studentName"></span></h3>
+    <div>
+      <button onclick="logoutStudent()">Logout</button>
+      <button class="toggle" onclick="toggleSidebar()">☰</button>
+    </div>
+  </div>
+
+  <!-- PROFILE SECTION -->
+  <div id="infoSection">
+    <div class="card">
+      <h4>Personal Information</h4>
+      <p><strong>ID:</strong> <span id="auID"></span></p>
+      <p><strong>Name:</strong> <span id="fullName"></span></p>
+      <p><strong>Email:</strong> <span id="email"></span></p>
+      <p><strong>Photo:</strong><br><span id="photoContainer"></span></p>
+      <p><strong>Facial Capture:</strong><br><span id="faceContainer"></span></p>
+      <p><strong>Emergency Contact:</strong> <span id="emergencyContact"></span></p>
+    </div>
+
+    <div class="card">
+      <h4>Address</h4>
+      <p><strong>Street:</strong> <span id="street"></span></p>
+      <p><strong>Barangay:</strong> <span id="barangay"></span></p>
+      <p><strong>City:</strong> <span id="province"></span></p>
+      <p><strong>ZIP:</strong> <span id="zip"></span></p>
+    </div>
+
+    <div class="card">
+      <h4>Enrollment Info</h4>
+      <p><strong>Campus:</strong> <span id="campus"></span></p>
+      <p><strong>Grade:</strong> <span id="grade"></span></p>
+      <p><strong>Section:</strong> <span id="section"></span></p>
+      <p><strong>Strand:</strong> <span id="strand"></span></p>
+      <p><strong>Status:</strong> <span id="status"></span></p>
+      <button onclick="generateEnrollmentForm()">Generate Printable Enrollment Form</button>
+    </div>
+  </div>
+
+  <!-- ACADEMIC SECTION -->
+  <div id="academicSection" style="display:none;">
+    <div class="card">
+      <h4>Subjects</h4>
+      <table id="subjectsTable">
+        <tr><th>Subject</th><th>Schedule</th><th>Grade</th></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- STUDENT ID SECTION -->
+  <div id="idSection" style="display:none;">
+    <div class="card" id="printable">
+      <h2>AU Student Enrollment Form</h2>
+      <h4>Student Information</h4>
+      <p><strong>ID:</strong> <span id="idFormID"></span></p>
+      <p><strong>Name:</strong> <span id="idFormName"></span></p>
+      <p><strong>Grade & Section:</strong> <span id="idFormGradeSection"></span></p>
+      <p><strong>Strand:</strong> <span id="idFormStrand"></span></p>
+      <p><strong>Campus:</strong> <span id="idFormCampus"></span></p>
+      <p><strong>Address:</strong> <span id="idFormAddress"></span></p>
+      <p><strong>Emergency Contact:</strong> <span id="idFormEmergency"></span></p>
+
+      <h4>Subjects & Grades</h4>
+      <table id="formSubjectsTable">
+        <tr><th>Subject</th><th>Schedule</th><th>Grade</th></tr>
+      </table>
+
+      <h4>Student ID Card</h4>
+      <div class="id-card">
+        <p><strong>ID:</strong> <span id="idCardID"></span></p>
+        <p><strong>Name:</strong> <span id="idCardName"></span></p>
+        <p><strong>Grade/Section:</strong> <span id="idCardGradeSection"></span></p>
+        <p><strong>Strand:</strong> <span id="idCardStrand"></span></p>
+        <img id="idCardPhoto" src="" width="100">
+      </div>
+      <div class="id-back">
+        <h5>Emergency Contact & Address</h5>
+        <p><strong>Emergency Contact:</strong> <span id="idCardEmergency"></span></p>
+        <p><strong>Address:</strong> <span id="idCardAddress"></span></p>
+      </div>
+      <button onclick="window.print()">Print Enrollment Form & ID</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// STRAND SUBJECTS
+const strandSubjects = {
+  "ABM":[{name:"Accounting", schedule:"Mon 8-10AM"},{name:"Economics", schedule:"Tue 10-12AM"},{name:"Business Math", schedule:"Wed 8-10AM"}],
+  "HUMSS":[{name:"Literature", schedule:"Mon 10-12AM"},{name:"Philosophy", schedule:"Tue 8-10AM"},{name:"Sociology", schedule:"Wed 10-12AM"}],
+  "STEM":[{name:"Calculus", schedule:"Mon 8-10AM"},{name:"Physics", schedule:"Tue 10-12AM"},{name:"Chemistry", schedule:"Wed 8-10AM"},{name:"Biology", schedule:"Thu 10-12AM"}],
+  "GAS":[{name:"General Math", schedule:"Mon 10-12AM"},{name:"Social Studies", schedule:"Tue 8-10AM"},{name:"Elective", schedule:"Wed 10-12AM"}],
+  "ICT":[{name:"Networking", schedule:"Mon 8-10AM"},{name:"Programming", schedule:"Tue 10-12AM"},{name:"Computer Systems", schedule:"Wed 8-10AM"}],
+  "Home Economics":[{name:"Food Tech", schedule:"Mon 8-10AM"},{name:"Clothing", schedule:"Tue 10-12AM"},{name:"Tourism", schedule:"Wed 8-10AM"}]
+};
+
+// POPULATE SUBJECTS
+function populateSubjects(student, tableId="subjectsTable"){
+  const table = document.getElementById(tableId);
+  table.innerHTML = "<tr><th>Subject</th><th>Schedule</th><th>Grade</th></tr>";
+  const subjects = strandSubjects[student.strand] || [];
+  if(subjects.length === 0){ table.innerHTML += `<tr><td colspan="3">No subjects assigned yet</td></tr>`; return; }
+  subjects.forEach(sub=>{
+    let grade="-";
+    if(student.subjects){
+      const found = student.subjects.find(s=>s.name===sub.name);
+      if(found) grade=found.grade||"-";
+    }
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${sub.name}</td><td>${sub.schedule}</td><td>${grade}</td>`;
+    table.appendChild(tr);
+  });
+}
+
+// SHOW PORTAL
+function showPortal(student){
+  const students = JSON.parse(localStorage.getItem('students')) || [];
+  const updatedStudent = students.find(s=>s.id===student.id)||student;
+  sessionStorage.setItem('currentStudent', JSON.stringify(updatedStudent));
+
+  document.getElementById('loginContainer').style.display='none';
+  document.getElementById('sidebar').style.display='flex';
+  document.getElementById('mainContent').style.display='block';
+
+  // PROFILE
+  document.getElementById('studentName').innerText = updatedStudent.firstName + " " + updatedStudent.lastName;
+  document.getElementById('auID').innerText = updatedStudent.id;
+  document.getElementById('fullName').innerText = updatedStudent.firstName + " " + updatedStudent.lastName;
+  document.getElementById('email').innerText = updatedStudent.email;
+  document.getElementById('photoContainer').innerHTML = updatedStudent.photo? `<img src="${updatedStudent.photo}" width="120">`:"No Photo";
+  document.getElementById('faceContainer').innerHTML = updatedStudent.facialPhoto? `<img src="${updatedStudent.facialPhoto}" width="120">`:"No Face";
+  document.getElementById('emergencyContact').innerText = updatedStudent.emergencyContact || "Not Provided";
+
+  document.getElementById('street').innerText = updatedStudent.street;
+  document.getElementById('barangay').innerText = updatedStudent.barangay;
+  document.getElementById('province').innerText = updatedStudent.province;
+  document.getElementById('zip').innerText = updatedStudent.zip;
+
+  document.getElementById('campus').innerText = updatedStudent.campus || "Not Assigned";
+  document.getElementById('grade').innerText = updatedStudent.grade || "Not Assigned";
+  document.getElementById('section').innerText = updatedStudent.section || "Not Assigned";
+  document.getElementById('strand').innerText = updatedStudent.strand || "Pending";
+  document.getElementById('status').innerText = updatedStudent.status || "Pending";
+
+  // Populate Subjects
+  populateSubjects(updatedStudent);
+
+  // ID Card + Enrollment Form
+  document.getElementById('idCardID').innerText = updatedStudent.id;
+  document.getElementById('idCardName').innerText = updatedStudent.firstName + " " + updatedStudent.lastName;
+  document.getElementById('idCardGradeSection').innerText = (updatedStudent.grade||"-")+" / "+(updatedStudent.section||"-");
+  document.getElementById('idCardStrand').innerText = updatedStudent.strand||"-";
+  document.getElementById('idCardPhoto').src = updatedStudent.photo||"";
+  document.getElementById('idCardEmergency').innerText = updatedStudent.emergencyContact || "Not Provided";
+  document.getElementById('idCardAddress').innerText = `${updatedStudent.street}, ${updatedStudent.barangay}, ${updatedStudent.province}, ${updatedStudent.zip}`;
+
+  // Enrollment form
+  document.getElementById('idFormID').innerText = updatedStudent.id;
+  document.getElementById('idFormName').innerText = updatedStudent.firstName + " " + updatedStudent.lastName;
+  document.getElementById('idFormGradeSection').innerText = (updatedStudent.grade||"-")+" / "+(updatedStudent.section||"-");
+  document.getElementById('idFormStrand').innerText = updatedStudent.strand || "-";
+  document.getElementById('idFormCampus').innerText = updatedStudent.campus || "-";
+  document.getElementById('idFormAddress').innerText = `${updatedStudent.street}, ${updatedStudent.barangay}, ${updatedStudent.province}, ${updatedStudent.zip}`;
+  document.getElementById('idFormEmergency').innerText = updatedStudent.emergencyContact || "Not Provided";
+  populateSubjects(updatedStudent, "formSubjectsTable");
+}
+
+// LOGIN
+function loginStudent(){
+  const id=document.getElementById('studentID').value.trim();
+  const students=JSON.parse(localStorage.getItem('students'))||[];
+  const student=students.find(s=>s.id===id);
+  if(!student){ alert("Student ID not found."); return; }
+  showPortal(student);
+}
+
+// LOGOUT
+function logoutStudent(){
+  sessionStorage.removeItem('currentStudent');
+  document.getElementById('loginContainer').style.display='block';
+  document.getElementById('sidebar').style.display='none';
+  document.getElementById('mainContent').style.display='none';
+  document.getElementById('studentID').value='';
+}
+
+// SHOW SECTIONS
+function showSection(sec){
+  document.getElementById('infoSection').style.display=sec==='info'?'block':'none';
+  document.getElementById('academicSection').style.display=sec==='academic'?'block':'none';
+  document.getElementById('idSection').style.display=sec==='id'?'block':'none';
+  document.querySelectorAll('.sidebar nav a').forEach(a=>a.classList.remove('active'));
+  if(sec==='info') document.querySelectorAll('.sidebar nav a')[0].classList.add('active');
+  else if(sec==='academic') document.querySelectorAll('.sidebar nav a')[1].classList.add('active');
+  else document.querySelectorAll('.sidebar nav a')[2].classList.add('active');
+}
+
+// TOGGLE SIDEBAR
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('show'); }
+
+// GENERATE PRINTABLE ENROLLMENT FORM
+function generateEnrollmentForm(){ window.print(); }
+
+// AUTO LOGIN
+document.addEventListener('DOMContentLoaded', ()=>{
+  const current=JSON.parse(sessionStorage.getItem('currentStudent'));
+  if(current) showPortal(current);
+});
+</script>
+</body>
+</html>

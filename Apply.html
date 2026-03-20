@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arellano University Digital Enrollment</title>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+/* -------- GENERAL STYLES -------- */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f4f6f9;
+    margin: 0;
+    color: #333;
+}
+header {
+    background: #003366;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+header img {
+    height: 50px;
+    margin-right: 15px;
+}
+h2, h3, h4 { margin: 0 0 15px 0; }
+.form-container {
+    max-width: 900px;
+    margin: 20px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+input, select {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0 16px 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    background: #003366;
+    color: white;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 10px;
+}
+button:hover {
+    background: #0055aa;
+}
+.step { display: none; }
+.step.active { display: block; }
+.progress-bar {
+    height: 15px;
+    background: #ddd;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    overflow: hidden;
+}
+.progress {
+    height: 100%;
+    width: 0%;
+    background: #003366;
+    transition: width 0.3s ease;
+}
+.photo-preview {
+    width: 150px;
+    height: 150px;
+    border: 2px dashed #003366;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+}
+.photo-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+.video-container { margin: 15px 0; }
+.select2-container { width: 100% !important; }
+label { font-weight: 600; }
+.alert { color: red; font-size: 0.9rem; margin-top: -12px; margin-bottom: 12px; }
+
+.name-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 120px;
+  gap: 10px;
+}
+
+.checkbox-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: -10px;
+  margin-bottom: 10px;
+}
+
+.error {
+  border: 1px solid red !important;
+}
+
+.error-message {
+  color: red;
+  font-size: 0.8rem;
+  margin-top: -10px;
+  margin-bottom: 10px;
+}
+
+/* MOBILE OPTIMIZATION */
+@media (max-width: 600px) {
+  .name-row {
+    grid-template-columns: 1fr;
+  }
+
+  header {
+    flex-direction: column;
+  }
+
+  header img {
+    margin-bottom: 10px;
+  }
+}
+
+</style>
+</head>
+<body>
+
+<header>
+  <img src="au-logo.png" alt="AU Logo">
+  <h2>Arellano University Digital Enrollment</h2>
+</header>
+
+<div class="form-container">
+  <div class="progress-bar">
+      <div class="progress" id="progress"></div>
+  </div>
+  <form id="enrollForm">
+
+    <!-- STEP 1: STUDENT INFO -->
+    <div class="step active" id="step1">
+      <h3>Step 1: Student Information</h3>
+      <input id="lastName" placeholder="Last Name" required>
+      <input id="firstName" placeholder="First Name" required>
+      <input id="middleInitial" placeholder="Middle Initial">
+      <label><input type="checkbox" id="noMI"> No Middle Initial</label>
+      <input id="suffix" placeholder="Suffix (Optional)">
+      <select id="gender" required>
+        <option value="">-- Select Gender --</option>
+        <option>Male</option>
+        <option>Female</option>
+      </select>
+      <input type="date" id="birthdate" required>
+      <input type="email" id="email" placeholder="Email" required>
+      <button type="button" onclick="validateStep(1,2)">Next</button>
+    </div>
+
+    <!-- STEP 2: ADDRESS -->
+    <div class="step" id="step2">
+      <h3>Step 2: Address</h3>
+      <label>City / Municipality</label>
+      <select id="province" required></select>
+      <label>Barangay</label>
+      <select id="barangay" required></select>
+      <label>Street / House No / Subdivision</label>
+      <input id="street" placeholder="Street / House No / Subdivision" required>
+      <label>ZIP Code</label>
+      <input id="zip" readonly placeholder="ZIP Code">
+      <button type="button" onclick="prevStep(1)">Back</button>
+      <button type="button" onclick="validateStep(2,3)">Next</button>
+    </div>
+
+    <!-- STEP 3: FAMILY BACKGROUND -->
+<div class="step" id="step3">
+  <h3>Step 3: Family Background</h3>
+
+  <h4>Father's Information</h4>
+  <div class="name-row">
+    <input id="fatherSurname" placeholder="Surname" required>
+    <input id="fatherFirstName" placeholder="First Name" required>
+    <input id="fatherMI" placeholder="MI">
+  </div>
+  <div class="checkbox-inline">
+    <input type="checkbox" id="noFatherMI"> <label for="noFatherMI">No Middle Initial</label>
+  </div>
+
+  <input id="fatherJob" placeholder="Father's Occupation">
+
+  <h4>Mother's Information</h4>
+  <div class="name-row">
+    <input id="motherSurname" placeholder="Surname" required>
+    <input id="motherFirstName" placeholder="First Name" required>
+    <input id="motherMI" placeholder="MI">
+  </div>
+  <div class="checkbox-inline">
+    <input type="checkbox" id="noMotherMI"> <label for="noMotherMI">No Middle Initial</label>
+  </div>
+
+  <input id="motherJob" placeholder="Mother's Occupation">
+
+  <h4>Guardian</h4>
+  <input id="guardianContact" placeholder="Guardian Contact Number (09XXXXXXXXX)" required>
+<div id="guardianError" class="error-message"></div>
+
+  <button type="button" onclick="prevStep(2)">Back</button>
+  <button type="button" onclick="validateStep(3,4)">Next</button>
+</div>
+
+    <!-- STEP 4: HIGH SCHOOL -->
+    <div class="step" id="step4">
+      <h3>Step 4: High School Background</h3>
+      <input id="hsSchool" placeholder="School Name" required>
+      <input id="hsAddress" placeholder="School Address" required>
+      <input id="hsAverage" type="number" min="60" max="100" placeholder="High School General Average" required>
+      <input id="hsYear" placeholder="Year Graduated" required>
+      <input id="hsAwards" placeholder="Honors / Awards">
+      <button type="button" onclick="prevStep(3)">Back</button>
+      <button type="button" onclick="validateStep(4,5)">Next</button>
+    </div>
+
+    <!-- STEP 5: DOCUMENTS & PHOTO -->
+<div class="step" id="step5">
+  <h3>Step 5: Documents</h3>
+
+
+  <h4>Facial Capture</h4>
+<div class="video-container">
+  <video id="video" width="300" height="225" autoplay muted></video><br>
+
+  <button type="button" onclick="captureFace()">Capture Face</button>
+  <button type="button" onclick="retakeFace()" id="retakeBtn" style="display:none; background:#777;">Retake</button>
+</div>
+
+<div id="facePreview" class="photo-preview">No Face</div>
+<div id="faceError" class="error-message"></div>
+
+  <h4>2x2 Photo</h4>
+  <label for="photoUpload">Upload 2x2 ID Picture</label>
+  <input type="file" id="photoUpload" required onchange="previewImage(this)">
+  <div id="photoPreview" class="photo-preview">No Image</div>
+
+  <h4>Required Documents</h4>
+
+  <label for="reportCard">Form 138 (Report Card)</label>
+  <input type="file" id="reportCard" required>
+
+  <label for="birthCert">PSA Birth Certificate</label>
+  <input type="file" id="birthCert" required>
+
+  <label for="goodMoral">Good Moral Certificate</label>
+  <input type="file" id="goodMoral" required>
+
+  <button type="button" onclick="prevStep(4)">Back</button>
+  <button type="button" onclick="validateStep(5,6)">Next</button>
+</div>
+
+    <!-- STEP 6: COURSE SELECTION -->
+    <div class="step" id="step6">
+      <h3>Step 6: Selection</h3>
+      <select id="Campus" required>
+        <option value="">Select Campus</option>
+        <option>Main (Legarda)</option>
+        <option>Pasig</option>
+        <option>Pasay</option>
+        <option>Malabon</option>
+      </select>
+      <select id="GradeLevel" required>
+        <option value="">Select Grade</option>
+        <option>Grade 11</option>
+        <option>Grade 12</option>
+      </select>
+      <select id="Strand" required>
+        <option value="">Select Strand</option>
+        <optgroup label="Academic Track">
+          <option>ABM</option>
+          <option>HUMSS</option>
+          <option>STEM</option>
+          <option>GAS</option>
+        </optgroup>
+        <optgroup label="TVL Track">
+          <option>ICT</option>
+          <option>Home Economics</option>
+        </optgroup>
+      </select>
+
+<div class="form-container">
+  <h3>Student Summary by Average</h3>
+  <div id="highestSection">
+    <h4>Highest Average</h4>
+    <ul id="highestList"></ul>
+  </div>
+  <div id="lowestSection">
+    <h4>Lowest Average</h4>
+    <ul id="lowestList"></ul>
+  </div>
+</div>
+
+      <button type="button" onclick="prevStep(5)">Back</button>
+ <button type="button" id="submitBtn">Submit Enrollment</button>
+    </div>
+
+  </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+// ---------------- MULTI-STEP FORM ----------------
+function nextStep(step){
+  document.querySelectorAll('.step').forEach(el=>el.classList.remove('active'));
+  document.getElementById('step'+step).classList.add('active');
+  document.getElementById('progress').style.width = (step/6*100)+'%';
+}
+function prevStep(step){ nextStep(step); }
+
+function validateStep(current, next){
+  let valid = true;
+  const inputs = document.querySelectorAll('#step'+current+' input, #step'+current+' select');
+
+  inputs.forEach(input => {
+    let errorMsg = input.nextElementSibling;
+
+    if (errorMsg && !errorMsg.classList.contains("error-message")) {
+      errorMsg = null;
+    }
+
+    if (input.required && !input.value) {
+      input.classList.add("error");
+
+      if (!errorMsg) {
+        const msg = document.createElement("div");
+        msg.className = "error-message";
+        msg.textContent = "This field is required";
+        input.after(msg);
+      }
+
+      valid = false;
+    } else {
+      input.classList.remove("error");
+      if (errorMsg) errorMsg.textContent = "";
+    }
+  });
+
+  // Extra validation for contact number
+  if (current === 3) {
+    if (!contactInput.value.startsWith("09") || contactInput.value.length !== 11) {
+      contactInput.classList.add("error");
+      contactError.textContent = "Enter a valid PH number (09XXXXXXXXX)";
+      valid = false;
+    }
+  }
+
+  if (valid) nextStep(next);
+}
+
+// Minimum average required for each strand
+const strandMinAverage = {
+  "ABM": 85,
+  "HUMSS": 85,
+  "STEM": 87,
+  "GAS": 83,
+  "ICT": 85,
+  "Home Economics": 83
+};
+
+
+// ---------------- METRO MANILA ADDRESS DATA ----------------
+const addressData = {
+  "Quezon City": {"Diliman":"1101","Cubao":"1109","Novaliches":"1123","Fairview":"1118"},
+  "Makati": {"Poblacion":"1200","Bel-Air":"1209","Dasmariñas":"1211"},
+  "Pasig": {"Bgy. San Miguel":"1600","Bgy. Oranbo":"1605"},
+  "Pasay": {"Bgy. 183":"1300","Bgy. 84":"1304"},
+  "Malabon": {"Tinajeros":"1470","Longos":"1471"},
+  "Manila": { "Tondo":"1012","Binondo":"1006","Sampaloc":"1008","Ermita":"1000","Santa Cruz":"1003","Quiapo":"1001","Malate":"1004" }
+};
+
+// ---------------- LOAD CITIES / BARANGAYS ----------------
+function loadCities() {
+  const provinceSelect = document.getElementById("province");
+  provinceSelect.innerHTML = '<option value="">-- Select City / Municipality --</option>';
+  Object.keys(addressData).forEach(city=>{
+    provinceSelect.innerHTML += `<option value="${city}">${city}</option>`;
+  });
+  document.getElementById("barangay").innerHTML = '<option value="">-- Select Barangay --</option>';
+  document.getElementById("zip").value = '';
+}
+document.getElementById("province").addEventListener("change", function(){
+  const city = this.value;
+  const barangaySelect = document.getElementById("barangay");
+  barangaySelect.innerHTML = '<option value="">-- Select Barangay --</option>';
+  document.getElementById("zip").value = '';
+  if(city && addressData[city]){
+    Object.keys(addressData[city]).forEach(brgy=>{
+      barangaySelect.innerHTML += `<option value="${brgy}">${brgy}</option>`;
+    });
+  }
+});
+document.getElementById("barangay").addEventListener("change", function(){
+  const city = document.getElementById("province").value;
+  const brgy = this.value;
+  document.getElementById("zip").value = city && brgy && addressData[city][brgy]? addressData[city][brgy]:'';
+});
+
+// ---------------- MIDDLE INITIAL TOGGLE ----------------
+document.getElementById("noMI").addEventListener("change", function(){
+  const mi = document.getElementById("middleInitial");
+  if(this.checked){ mi.value="N/A"; mi.disabled=true; } else{ mi.value=""; mi.disabled=false; }
+});
+
+// ---------------- IMAGE PREVIEW ----------------
+function previewImage(input){
+  const reader = new FileReader();
+  reader.onload = e => document.getElementById("photoPreview").innerHTML = `<img src="${e.target.result}">`;
+  reader.readAsDataURL(input.files[0]);
+}
+
+// ---------------- CAMERA & FACE CAPTURE ----------------
+const video = document.getElementById('video');
+const canvas = document.createElement('canvas');
+canvas.width = 300; canvas.height = 225;
+navigator.mediaDevices.getUserMedia({video:true})
+.then(stream=>video.srcObject=stream)
+.catch(err=>console.warn("Camera not available", err));
+function captureFace(){
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video,0,0,canvas.width,canvas.height);
+  const faceData = canvas.toDataURL();
+
+  document.getElementById('facePreview').innerHTML = `<img src="${faceData}">`;
+  localStorage.setItem("face", faceData);
+
+  // Show retake button
+  document.getElementById("retakeBtn").style.display = "inline-block";
+
+  // Optional: pause video after capture
+  video.pause();
+}
+
+function retakeFace(){
+  // Clear preview
+  document.getElementById('facePreview').innerHTML = "No Face";
+
+  // Remove stored image
+  localStorage.removeItem("face");
+
+  // Resume camera
+  video.play();
+
+  // Hide retake button again
+  document.getElementById("retakeBtn").style.display = "none";
+}
+
+// ---------------- FORM SUBMISSION ----------------
+// ---------------- FORM SUBMISSION ----------------
+function submitForm(){
+  // Validate Step 6 required fields
+  const step6Inputs = document.querySelectorAll('#step6 select');
+  let valid = true;
+
+  step6Inputs.forEach(input => {
+    if (!input.value) {
+      input.classList.add("error");
+      valid = false;
+    } else {
+      input.classList.remove("error");
+    }
+  });
+
+  if (!valid) {
+    alert("Please complete all selections.");
+    return;
+  }
+
+  // Get HS average and Strand
+  const hsAvg = parseFloat(document.getElementById('hsAverage').value);
+  const selectedStrand = document.getElementById('Strand').value;
+
+  // Check if average meets strand minimum
+  if (strandMinAverage[selectedStrand] && hsAvg < strandMinAverage[selectedStrand]) {
+    alert(`Sorry, your high school average (${hsAvg}%) does not meet the minimum required for ${selectedStrand} (${strandMinAverage[selectedStrand]}%).`);
+    return; // Stop submission
+  }
+
+  const emergencyContactInput = document.getElementById('emergencyContact');
+  const emergencyContact = emergencyContactInput ? emergencyContactInput.value : "N/A";
+
+  const student = {
+    id: "AU-"+Math.floor(Math.random()*999999),
+    firstName: document.getElementById('firstName').value,
+    lastName: document.getElementById('lastName').value,
+    middleInitial: document.getElementById('middleInitial').value || "N/A",
+    suffix: document.getElementById('suffix').value || "N/A",
+    gender: document.getElementById('gender').value,
+    birthdate: document.getElementById('birthdate').value,
+    email: document.getElementById('email').value,
+    province: document.getElementById('province').value,
+    barangay: document.getElementById('barangay').value,
+    street: document.getElementById('street').value,
+    zip: document.getElementById('zip').value,
+    fatherSurname: document.getElementById('fatherSurname').value,
+    fatherFirstName: document.getElementById('fatherFirstName').value,
+    fatherMI: document.getElementById('fatherMI').value || "N/A",
+    fatherJob: document.getElementById('fatherJob').value || "N/A",
+    motherSurname: document.getElementById('motherSurname').value,
+    motherFirstName: document.getElementById('motherFirstName').value,
+    motherMI: document.getElementById('motherMI').value || "N/A",
+    motherJob: document.getElementById('motherJob').value || "N/A",
+    guardianContact: document.getElementById('guardianContact').value,
+    hsSchool: document.getElementById('hsSchool').value,
+    hsAddress: document.getElementById('hsAddress').value,
+    hsAverage: hsAvg,
+    hsYear: document.getElementById('hsYear').value,
+    hsAwards: document.getElementById('hsAwards').value || "N/A",
+    emergencyContact: document.getElementById('guardianContact').value,
+    campus: document.getElementById('Campus').value,
+    grade: document.getElementById('GradeLevel').value,
+    strand: document.getElementById('Strand').value,
+    photo: document.querySelector('#photoPreview img')?.src || "",
+    facialPhoto: localStorage.getItem("face") || "",
+    status: "Pending"
+  };
+
+  let db = JSON.parse(localStorage.getItem('students')) || [];
+  db.push(student);
+  localStorage.setItem('students', JSON.stringify(db));
+
+  alert("Enrollment Submitted!\nYour ID: "+student.id);
+
+  updateStudentSummary(); // update highest/lowest lists immediately
+}
+
+
+document.getElementById("noFatherMI").addEventListener("change", function(){
+  const mi = document.getElementById("fatherMI");
+  if(this.checked){ mi.value="N/A"; mi.disabled=true; }
+  else{ mi.value=""; mi.disabled=false; }
+});
+
+document.getElementById("noMotherMI").addEventListener("change", function(){
+  const mi = document.getElementById("motherMI");
+  if(this.checked){ mi.value="N/A"; mi.disabled=true; }
+  else{ mi.value=""; mi.disabled=false; }
+});
+
+function capitalizeInput(el){
+  el.value = el.value.replace(/\b\w/g, c => c.toUpperCase());
+}
+
+[
+ 'fatherSurname','fatherFirstName','fatherMI',
+ 'motherSurname','motherFirstName','motherMI'
+].forEach(id=>{
+  document.getElementById(id).addEventListener('input', function(){
+    capitalizeInput(this);
+  });
+});
+
+const contactInput = document.getElementById("guardianContact");
+const contactError = document.getElementById("guardianError");
+
+contactInput.addEventListener("input", function () {
+  // Remove non-digits
+  this.value = this.value.replace(/\D/g, '');
+
+  // Limit to 11 digits
+  if (this.value.length > 11) {
+    this.value = this.value.slice(0, 11);
+  }
+
+  // Validate PH format
+  if (this.value.length === 11 && this.value.startsWith("09")) {
+    contactInput.classList.remove("error");
+    contactError.textContent = "";
+  } else {
+    contactInput.classList.add("error");
+    contactError.textContent = "Enter a valid PH number (09XXXXXXXXX)";
+  }
+});
+
+function updateStudentSummary() {
+  const students = JSON.parse(localStorage.getItem('students')) || [];
+  if (!students.length) return;
+
+  // Find highest and lowest averages
+  let highestAvg = Math.max(...students.map(s => s.hsAverage));
+  let lowestAvg = Math.min(...students.map(s => s.hsAverage));
+
+  // Filter students
+  const highestStudents = students.filter(s => s.hsAverage === highestAvg);
+  const lowestStudents = students.filter(s => s.hsAverage === lowestAvg);
+
+  // Display in the lists
+  const highestList = document.getElementById('highestList');
+  const lowestList = document.getElementById('lowestList');
+
+  highestList.innerHTML = '';
+  lowestList.innerHTML = '';
+
+  highestStudents.forEach(s => {
+    const li = document.createElement('li');
+    li.textContent = `${s.firstName} ${s.lastName} - ${s.hsAverage}%`;
+    highestList.appendChild(li);
+  });
+
+  lowestStudents.forEach(s => {
+    const li = document.createElement('li');
+    li.textContent = `${s.firstName} ${s.lastName} - ${s.hsAverage}%`;
+    lowestList.appendChild(li);
+  });
+}
+
+// Call this on page load to show summary
+document.addEventListener('DOMContentLoaded', updateStudentSummary);
+
+
+// Change Step 6 button to call submitForm()
+document.getElementById('submitBtn').addEventListener('click', submitForm);
+
+document.addEventListener("DOMContentLoaded", loadCities);
+</script>
+</body>
+</html>

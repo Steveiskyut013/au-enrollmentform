@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AU Admin Dashboard</title>
+<style>
+    body{font-family:Arial,sans-serif;background:#f4f4f4;margin:0;}
+    header{background:#003366;color:#fff;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;}
+    table{width:100%;border-collapse:collapse;margin:20px 0;background:#fff;}
+    th,td{border:1px solid #ccc;padding:8px;text-align:left;}
+    th{background:#003366;color:#fff;}
+    button{padding:5px 10px;margin:2px;border:none;border-radius:4px;cursor:pointer;}
+    .approve{background:green;color:#fff;}
+    .reject{background:red;color:#fff;}
+    .delete{background:#cc0000;color:#fff;}
+    /* Popup preview */
+    #docPreview{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);justify-content:center;align-items:center;}
+    #docPreview iframe{width:80%;height:80%;border:none;background:#fff;}
+    #docPreview button{position:absolute;top:20px;right:20px;padding:10px;background:red;color:#fff;border:none;border-radius:6px;cursor:pointer;}
+</style>
+</head>
+<body>
+
+<header>
+    <h2>Admin Dashboard</h2>
+    <button onclick="logout()">Logout</button>
+</header>
+
+<div style="padding:20px;">
+    <table id="studentTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Strand</th>
+                <th>Status</th>
+                <th>Grade & Section</th>
+                <th>Documents</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<!-- Document Preview Modal -->
+<div id="docPreview">
+    <button onclick="closePreview()">Close</button>
+    <iframe src="" id="previewFrame"></iframe>
+</div>
+
+<script>
+// ---------------- ADMIN CHECK ----------------
+if(localStorage.getItem('adminLoggedIn') !== 'true'){
+    location.href = 'admin.html';
+}
+
+// ---------------- LOAD STUDENTS ----------------
+function loadStudents(){
+    const students = JSON.parse(localStorage.getItem('students')) || [];
+    const tbody = document.querySelector('#studentTable tbody');
+    tbody.innerHTML = '';
+
+    students.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${s.id}</td>
+            <td>${s.firstName} ${s.lastName}</td>
+            <td>${s.strand || '---'}</td>
+            <td>${s.status || 'Pending'}</td>
+            <td>${s.section || '---'}</td>
+            <td>
+                ${s.documents && s.documents.length > 0 
+                    ? s.documents.map((doc,i) => `<a href="#" onclick="previewDoc('${doc.replace(/'/g,"\\'")}')">Doc ${i+1}</a>`).join('<br>') 
+                    : 'No Documents'}
+            </td>
+            <td>
+                ${s.status !== 'Approved' ? `<button class="approve" onclick="approve('${s.id}')">Approve</button>` : ''}
+                ${s.status !== 'Rejected' ? `<button class="reject" onclick="reject('${s.id}')">Reject</button>` : ''}
+                <button class="delete" onclick="deleteStudent('${s.id}')">Delete</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// ---------------- APPROVE ----------------
+function approve(id){
+    let students = JSON.parse(localStorage.getItem('students')) || [];
+    students = students.map(s => {
+        if(s.id === id){
+            s.status = 'Approved';
+            s.message = "🎉 Congratulations! You have been officially admitted to Arellano University.";
+            if(!s.section){
+                s.section = s.strand + ' - ' + (Math.floor(Math.random()*3)+1);
+            }
+        }
+        return s;
+    });
+    localStorage.setItem('students', JSON.stringify(students));
+    alert("Student approved successfully!");
+    loadStudents();
+}
+
+// ---------------- REJECT ----------------
+function reject(id){
+    let students = JSON.parse(localStorage.getItem('students')) || [];
+    students = students.map(s => {
+        if(s.id === id){
+            s.status = 'Rejected';
+            s.message = "We regret to inform you that your application was not successful.";
+        }
+        return s;
+    });
+    localStorage.setItem('students', JSON.stringify(students));
+    alert("Student rejected.");
+    loadStudents();
+}
+
+// ---------------- DELETE ----------------
+function deleteStudent(id){
+    if(!confirm("Are you sure you want to delete this student?")) return;
+    let students = JSON.parse(localStorage.getItem('students')) || [];
+    students = students.filter(s => s.id !== id);
+    localStorage.setItem('students', JSON.stringify(students));
+    loadStudents();
+}
+
+// ---------------- LOGOUT ----------------
+function logout(){
+    localStorage.removeItem('adminLoggedIn');
+    location.href='admin.html';
+}
+
+// ---------------- DOCUMENT PREVIEW ----------------
+function previewDoc(url){
+    const iframe = document.getElementById('previewFrame');
+    iframe.src = url;
+    document.getElementById('docPreview').style.display = 'flex';
+}
+
+function closePreview(){
+    document.getElementById('docPreview').style.display = 'none';
+    document.getElementById('previewFrame').src = '';
+}
+
+// ---------------- INITIAL LOAD ----------------
+loadStudents();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,155 @@
+/* GENERAL STYLES */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f4f4f4;
+    color: #333;
+}
+
+header, .au-header {
+    background-color: #003366;
+    color: white;
+    padding: 15px 20px;
+    text-align: center;
+}
+
+h1, h2, h3, h4 {
+    margin: 5px 0;
+}
+
+a {
+    text-decoration: none;
+    color: #003366;
+}
+
+a:hover {
+    color: #ffcc00;
+}
+
+/* BUTTONS */
+button, .btn {
+    padding: 8px 15px;
+    background-color: #003366;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 5px 0;
+}
+
+button.btn-secondary {
+    background-color: #666;
+}
+
+button:hover {
+    background-color: #0055a5;
+}
+
+/* FORM CONTAINERS */
+.form-container {
+    max-width: 700px;
+    margin: 20px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+input[type=text], input[type=email], input[type=date], select, input[type=file] {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0 12px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* PORTAL DASHBOARD */
+.portal-container {
+    max-width: 1000px;
+    margin: 20px auto;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background: #ddd;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.progress {
+    width: 0%;
+    height: 100%;
+    background: #003366;
+    transition: width 0.3s;
+}
+
+/* IMAGE PREVIEW */
+.photo-preview {
+    width: 150px;
+    height: 150px;
+    border: 2px dashed #003366;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f0f0;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.photo-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* TABLES FOR ADMIN */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #003366;
+    color: white;
+}
+
+/* HOVER & ACTIONS */
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 10px;
+    background: #003366;
+    color: #fff;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* STEPS */
+.step-section, .step {
+    display: block;
+}
+
+.step {
+    display: none;
+}
